@@ -1144,12 +1144,20 @@ def ppv2(
         raise NotImplementedError
 
     # global values -----------------------------------------------
-    nobjects_over_2k = nobjects / 2000.0
+    def low_objects(stars):
+        multiplier = min(0.5, 0.59 + (-0.59 * math.exp(-0.0038 * nobjects)))
+        multiplier = min(0.95 + min(0.1, nobjects / 5000), 
+            0.55 + multiplier + max(0, 0.4 - pp_base(stars) / 12.5))
 
-    length_bonus = 0.95 + 0.4 * min(1.0, nobjects_over_2k)
+        def bonus(n):
+            if n <= 500:
+                return multiplier
+            elif n <= 2000:
+                return bonus(500) + 0.3 * min(1, (n-500) / 1500)
+            elif n > 2000:
+                return bonus(2000) + 0.5 * math.log10(n / 2000)
 
-    if nobjects > 2000:
-        length_bonus += math.log10(nobjects_over_2k) * 0.5
+        return bonus(nobjects)
 
     miss_penality = pow(0.97, nmiss)
     combo_break = pow(combo, 0.8) / pow(max_combo, 0.8)
@@ -1176,7 +1184,7 @@ def ppv2(
 
     # aim pp ------------------------------------------------------
     aim = pp_base(aim_stars)
-    aim *= length_bonus
+    aim *= low_objects(aim_stars)
     aim *= miss_penality
     aim *= combo_break
     aim *= ar_bonus
@@ -1185,7 +1193,7 @@ def ppv2(
         aim *= 1.02 + (11 - ar) / 50
 
     if mods & MODS_FL != 0:
-        aim *= 1.45 * length_bonus
+        aim *= max(1, 1.45 * low_objects(aim_stars))
 
     acc_bonus = 0.5 + accuracy / 2.0
     od_bonus = 0.98 + (od * od) / 2500.0
@@ -1195,7 +1203,7 @@ def ppv2(
 
     # speed pp ----------------------------------------------------
     speed = pp_base(speed_stars)
-    speed *= length_bonus
+    speed *= low_objects(speed_stars)
     speed *= miss_penality
     speed *= combo_break
     speed *= acc_bonus
