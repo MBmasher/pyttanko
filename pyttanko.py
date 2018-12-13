@@ -1185,7 +1185,12 @@ def ppv2(
         aim *= 1.02 + (11 - ar) / 50
 
     if mods & MODS_FL != 0:
-        aim *= 1.45 * length_bonus
+        _aim = 1.0 + 0.35 * min(1.0, nobjects / 250.0)
+        if nobjects > 250:
+            _aim += 0.3 * min(1, (nobjects -250) / 250.0)
+        if nobjects > 500:
+            _aim += (nobjects - 500) / 1200.0
+        aim *= _aim
 
     acc_bonus = 0.5 + accuracy / 2.0
     od_bonus = 0.98 + (od * od) / 2500.0
