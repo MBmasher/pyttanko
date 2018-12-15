@@ -1187,7 +1187,7 @@ def ppv2(
     if mods & MODS_FL != 0:
         _aim = 1.0 + 0.35 * min(1.0, nobjects / 200.0)
         if nobjects > 200:
-            _aim += 0.3 * min(1, (nobjects - 200) / 200.0)
+            _aim += 0.3 * min(1, (nobjects - 200) / 300.0)
         if nobjects > 500:
             _aim += (nobjects - 500) / 1200.0
         aim *= _aim
